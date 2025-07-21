@@ -2,7 +2,7 @@
 
 include 'db.php';
 
-$tiitle = $_POST['title'];
+$title = $_POST['title'];
 $description = $_POST['description'];
 $event_date = $_POST['event_date'];
 
