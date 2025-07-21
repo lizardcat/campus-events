@@ -14,7 +14,7 @@
 
 <div class="container">
     <h2>Upcoming Events</h2>
-    <ul>
+    <ol>
         <?php
         $result = $conn->query("SELECT * FROM events ORDER BY event_date ASC");
         while ($row = $result->fetch_assoc()):
@@ -33,35 +33,53 @@
                     </form>
                 <?php endif; ?>
 
-                <div class="comment-section">
-                    <h4>Comments:</h4>
-                    <?php
-                    $cstmt = $conn->prepare("
-                        SELECT c.comment, c.posted_at, u.username 
-                        FROM comments c 
-                        JOIN users u ON c.user_id = u.id 
-                        WHERE c.event_id = ? 
-                        ORDER BY c.posted_at DESC
-                    ");
-                    $cstmt->bind_param("i", $event_id);
-                    $cstmt->execute();
-                    $cstmt->bind_result($comment, $posted_at, $username);
-                    while ($cstmt->fetch()):
-                    ?>
-                        <div class="comment-box">
-                            <div class="comment-meta">
-                                <strong><?= htmlspecialchars($username) ?></strong>
-                                <span><?= $posted_at ?></span>
+                <?php
+                // Check if there are any comments for this event
+                $cstmt = $conn->prepare("
+                    SELECT COUNT(*) 
+                    FROM comments 
+                    WHERE event_id = ?
+                ");
+                $cstmt->bind_param("i", $event_id);
+                $cstmt->execute();
+                $cstmt->bind_result($comment_count);
+                $cstmt->fetch();
+                $cstmt->close();
+
+                // Only display the comment section if there are comments
+                if ($comment_count > 0):
+                ?>
+                    <div class="comment-section">
+                        <h4>Comments:</h4>
+                        <?php
+                        $cstmt = $conn->prepare("
+                            SELECT c.comment, c.posted_at, u.username 
+                            FROM comments c 
+                            JOIN users u ON c.user_id = u.id 
+                            WHERE c.event_id = ? 
+                            ORDER BY c.posted_at DESC
+                        ");
+                        $cstmt->bind_param("i", $event_id);
+                        $cstmt->execute();
+                        $cstmt->bind_result($comment, $posted_at, $username);
+                        while ($cstmt->fetch()):
+                        ?>
+                            <div class="comment-box">
+                                <div class="comment-meta">
+                                    <strong><?= htmlspecialchars($username) ?></strong>
+                                    <span><?= $posted_at ?></span>
+                                </div>
+                                <div class="comment-body">
+                                    <?= nl2br(htmlspecialchars($comment)) ?>
+                                </div>
                             </div>
-                            <div class="comment-body">
-                                <?= nl2br(htmlspecialchars($comment)) ?>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
-                </div>
+                        <?php endwhile; ?>
+                        <?php $cstmt->close(); ?>
+                    </div>
+                <?php endif; ?>
             </li>
         <?php endwhile; ?>
-    </ul>
+    </ol>
 </div>
 
 
