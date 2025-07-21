@@ -1,0 +1,287 @@
+/* css/style.css */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: #f7f7f7;
+  color: #333;
+}
+
+.hero {
+  background: #003366;
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.event-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+}
+
+.event-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.event-meta {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0.5rem 0;
+}
+
+.register-btn {
+  margin-top: 1rem;
+  background: #007acc;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.register-btn:hover {
+  background: #005fa3;
+}
+
+
+
+/* Event Details */
+.event-detail-container {
+  padding: 2rem;
+}
+
+#event-detail {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+#comments-section {
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+#comment-form {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+#comment-form input {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+#comment-form button {
+  padding: 0.5rem 1rem;
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+}
+
+
+/* Auth Forms */
+.auth-container {
+  max-width: 400px;
+  margin: 3rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-form input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.auth-form button {
+  padding: 0.75rem;
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.auth-form button:hover {
+  background: #005fa3;
+}
+
+.auth-form p {
+  font-size: 0.9rem;
+}
+
+
+/* Dashboard Container */
+.dashboard-container {
+  padding: 2rem;
+}
+
+
+/* Admin Panel */
+.admin-container {
+  padding: 2rem;
+}
+
+.create-btn {
+  display: inline-block;
+  margin: 1rem 0;
+  padding: 0.6rem 1.2rem;
+  background: #28a745;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.create-btn:hover {
+  background: #1f8b38;
+}
+
+.event-card .admin-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.event-card .edit-btn,
+.event-card .delete-btn {
+  flex: 1;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.edit-btn {
+  background: #ffc107;
+}
+
+.delete-btn {
+  background: #dc3545;
+}
+
+
+
+
+/* Create Event Form */
+.form-container {
+  max-width: 600px;
+  margin: 3rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.event-form input,
+.event-form select,
+.event-form textarea {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.event-form button {
+  padding: 0.75rem;
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.event-form button:hover {
+  background: #005fa3;
+}
+
+/* Clubs Page */
+.clubs-container {
+  padding: 2rem;
+}
+
+.club-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.club-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.club-card h3 {
+  margin-top: 0;
+}
+
+.club-card p {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+
+/* 404 Page */
+.error-container {
+  text-align: center;
+  padding: 5rem 2rem;
+}
+
+.error-container h1 {
+  font-size: 6rem;
+  margin-bottom: 1rem;
+  color: #007acc;
+}
+
+.error-container p {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.home-btn {
+  padding: 0.75rem 1.5rem;
+  background: #007acc;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.home-btn:hover {
+  background: #005fa3;
+}

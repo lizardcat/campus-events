@@ -1,33 +1,26 @@
-<?php 
-include 'includes/db.php';
-include 'includes/head.php';
-include 'includes/header.php';
+<!-- register.php -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register | Campus Events</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+  <?php include 'components/navbar.php'; ?>
 
-    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-    $stmt->bind_param("ss", $username, $password);
-    $stmt->execute();
-
-    header("Location: login.php?registered=1");
-    exit;
-}
-?> 
-
-<div class="container">
-    <h1>REGISTER</h1>
-    <p>Already have an account? <a href="login.php">Login!</a></p>
-    <form method="POST">
-        <input type="text" name="username" placeholder="Username" required><br>
-        <input type="password" name="password" placeholder="Password" required><br>
-        <input type="password" name="confirmPass" placeholder="Confirm Password" required><br>
-        <button type="submit" name="submit">REGISTER</button>
+  <main class="auth-container">
+    <h2>Create an Account</h2>
+    <form id="register-form" class="auth-form">
+      <input type="text" placeholder="Full Name" required />
+      <input type="email" placeholder="Email" required />
+      <input type="password" placeholder="Password" required />
+      <input type="password" placeholder="Confirm Password" required />
+      <button type="submit">Register</button>
+      <p>Already have an account? <a href="login.php">Login here</a></p>
     </form>
-</div>
-
-<?php include 'includes/footer.php'; ?>
+  </main>
 
 </body>
 </html>
