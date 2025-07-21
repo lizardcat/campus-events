@@ -1,7 +1,7 @@
 <?php 
 
 session_start();
-include 'db.php';
+include 'includes/db.php';
 
 if (!isset($_SESSION["user_id"], $_POST["event_id"], $_POST["comment"])) {
     die("Invalid request.");

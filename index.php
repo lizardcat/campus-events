@@ -1,6 +1,6 @@
-<?php include 'db.php'; ?>
-<?php include 'head.php'; ?>
-<?php include 'header.php'; ?>
+<?php include 'includes/db.php'; ?>
+<?php include 'includes/head.php'; ?>
+<?php include 'includes/header.php'; ?>
 
 <div class="container">
     <h2>Submit Event</h2>
@@ -65,7 +65,7 @@
 </div>
 
 
-<?php include 'footer.php'; ?>
+<?php include 'includes/footer.php'; ?>
 
 </body>
 </html>

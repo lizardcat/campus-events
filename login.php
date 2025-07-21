@@ -1,8 +1,8 @@
 <?php 
 
-include 'db.php';
-include 'head.php';
-include 'header.php';
+include 'includes/db.php';
+include 'includes/head.php';
+include 'includes/header.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
@@ -39,7 +39,7 @@ if (isset($_GET['registered'])) {
     </form>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include 'includes/footer.php'; ?>
 
 </body>
 </html>

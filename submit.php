@@ -1,6 +1,6 @@
 <?php 
 
-include 'db.php';
+include 'includes/db.php';
 
 $title = $_POST['title'];
 $description = $_POST['description'];
