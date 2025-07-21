@@ -1,0 +1,14 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore PHP environment configs
+.env
+*.log
+
+# Ignore IDE/editor files
+.vscode/
+*.swp
+
+# Ignore uploads if any
+uploads/
