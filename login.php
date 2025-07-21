@@ -40,6 +40,3 @@ if (isset($_GET['registered'])) {
 </div>
 
 <?php include 'includes/footer.php'; ?>
-
-</body>
-</html>
