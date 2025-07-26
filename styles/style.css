@@ -1,3 +1,11 @@
+
+@media (min-width: 768px) {
+    .carousel-img {
+        height: 500px !important;
+        object-fit: cover;
+    }
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f5f7fa;
@@ -21,6 +29,8 @@ nav a {
 nav a:hover {
     color: #fff;
 }
+
+
 
 .container {
     max-width: 600px;

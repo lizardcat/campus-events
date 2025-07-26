@@ -2,6 +2,41 @@
 <?php include 'includes/head.php'; ?>
 <?php include 'includes/header.php'; ?>
 
+<div id="schoolCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="images/school1.jpg" class="d-block w-100 carousel-img" alt="Campus">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Main Campus</h2>
+                <h5>Explore academic excellence and innovation.</h5>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="images/school2.jpg" class="d-block w-100 carousel-img" alt="Library">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Library Hub</h2>
+                <h5>Thousands of resources at your fingertips.</h5>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="images/school3.jpg" class="d-block w-100 carousel-img" alt="Event">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Student Life</h2>
+                <h5>Clubs, events, and community engagement.</h5>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#schoolCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#schoolCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+
 <div class="container">
     <h2>Submit Event</h2>
     <form method="POST" action="submit.php">
@@ -19,7 +54,7 @@
         $result = $conn->query("SELECT * FROM events ORDER BY event_date ASC");
         while ($row = $result->fetch_assoc()):
             $event_id = $row['id'];
-        ?>
+            ?>
             <li class="event-block">
                 <h3><?= htmlspecialchars($row['title']) ?></h3>
                 <p><strong>Date:</strong> <?= $row['event_date'] ?></p>
@@ -48,7 +83,7 @@
 
                 // Only display the comment section if there are comments
                 if ($comment_count > 0):
-                ?>
+                    ?>
                     <div class="comment-section">
                         <h4>Comments:</h4>
                         <?php
@@ -63,7 +98,7 @@
                         $cstmt->execute();
                         $cstmt->bind_result($comment, $posted_at, $username);
                         while ($cstmt->fetch()):
-                        ?>
+                            ?>
                             <div class="comment-box">
                                 <div class="comment-meta">
                                     <strong><?= htmlspecialchars($username) ?></strong>
