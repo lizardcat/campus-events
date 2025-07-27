@@ -1,6 +1,9 @@
-<?php include 'includes/db.php'; ?>
-<?php include 'includes/head.php'; ?>
-<?php include 'includes/header.php'; ?>
+<?php
+session_start();
+include 'includes/db.php';
+include 'includes/head.php';
+include 'includes/header.php';
+?>
 
 <div id="schoolCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
     <div class="carousel-inner">
