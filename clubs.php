@@ -16,9 +16,14 @@ $result = mysqli_query($conn, $query);
             <?php while ($club = mysqli_fetch_assoc($result)): ?>
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
-                        <img src="<?= htmlspecialchars($club['image_url']) ?>" class="card-img-top"
-                            alt="<?= htmlspecialchars($club['name']) ?>"
-                            onerror="this.onerror=null;this.src='images/default_club.png';">
+                        <?php
+                        $img_path = $club['image_url'];
+                        $img_src = (file_exists($img_path) && is_file($img_path)) ? $img_path : 'images/default_club.jpg';
+                        ?>
+                        <img src="<?= htmlspecialchars($img_src) ?>" class="card-img-top"
+                            alt="<?= htmlspecialchars($club['name']) ?>" style="height: 180px; object-fit: cover;">
+
+
                         <div class="card-body">
                             <h5 class="card-title"><?= htmlspecialchars($club['name']) ?></h5>
                             <p class="card-text"><?= htmlspecialchars($club['description']) ?></p>

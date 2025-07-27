@@ -65,8 +65,13 @@
             ?>
             <div class="col-md-6 col-lg-4">
                 <div class="card shadow h-100">
-                    <img src="images/default_event.jpg" class="card-img-top" alt="Event Image"
+                    <?php
+                    $img_path = $row['image_path'];
+                    $img_src = (file_exists($img_path) && is_file($img_path)) ? $img_path : 'images/default_event.jpg';
+                    ?>
+                    <img src="<?= htmlspecialchars($img_src) ?>" class="card-img-top" alt="Event Image"
                         style="height: 180px; object-fit: cover;">
+
                     <div class="card-body">
                         <h5 class="card-title"><?= htmlspecialchars($row['title']) ?></h5>
                         <p class="card-text"><strong>Date:</strong> <?= $row['event_date'] ?></p>

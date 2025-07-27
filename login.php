@@ -7,13 +7,14 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
+    $identifier = $_POST['username']; // can be username or email
+    $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT id, password FROM users WHERE username = ?");
-    $stmt->bind_param("s", $username);
+    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
+    $stmt->bind_param("ss", $identifier, $identifier);
     $stmt->execute();
-    $stmt->bind_result($id, $hashed);
+    $stmt->bind_result($id, $username, $hashed);
     if ($stmt->fetch() && password_verify($password, $hashed)) {
         $_SESSION['user_id'] = $id;
         $_SESSION['username'] = $username;
@@ -41,7 +42,7 @@ if (isset($_GET['registered'])) {
             <?php endif; ?>
             <form method="post">
                 <div class="mb-3">
-                    <input type="text" name="username" class="form-control" placeholder="Username" required>
+                    <input type="text" name="username" class="form-control" placeholder="Username or Email" required>
                 </div>
                 <div class="mb-3">
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
