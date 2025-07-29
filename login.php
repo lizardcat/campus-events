@@ -9,7 +9,6 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = $_POST['username']; // can be username or email
-    $email = $_POST['email'];
     $password = $_POST['password'];
 
     $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
