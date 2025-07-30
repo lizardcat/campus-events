@@ -1,18 +1,30 @@
+.caption-elevated {
+    /* subtle glass effect */
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: .5rem;
+    padding: .5rem 1rem;
+}
 
-@media (min-width: 768px) {
+.carousel-img {
+    height: 55vh;
+    object-fit: cover;
+}
+
+@media (min-width: 992px) {
     .carousel-img {
-        height: 500px !important;
-        object-fit: cover;
+        height: 65vh;
     }
-} 
+}
 
 html, body {
-        height: 100%;
-    }
-    body {
-        display: flex;
-        flex-direction: column;
-    }
-    .main-content {
-        flex: 1;
-    }
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+}
+.main-content {
+    flex: 1;
+}

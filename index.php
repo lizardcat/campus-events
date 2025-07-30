@@ -164,29 +164,6 @@ include 'includes/header.php';
     </div>
 </div>
 
-<style>
-    /* Caption readability over images */
-    .caption-elevated {
-        /* subtle glass effect */
-        backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
-        background: rgba(0, 0, 0, 0.35);
-        border-radius: .5rem;
-        padding: .5rem 1rem;
-    }
-
-    .carousel-img {
-        height: 55vh;
-        object-fit: cover;
-    }
-
-    @media (min-width: 992px) {
-        .carousel-img {
-            height: 65vh;
-        }
-    }
-</style>
-
 <script>
     // AJAX: Submit Event with optional image
     const eventForm = document.getElementById('eventForm');
