@@ -1,28 +1,31 @@
 <?php
 session_start();
-require 'includes/db.php';
+require_once 'includes/db.php';
 
-if (!isset($_SESSION['user_id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(403);
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
     exit;
 }
 
 $user_id = (int) $_SESSION['user_id'];
-$event_id = (int) ($_POST['event_id'] ?? 0);
+$event_id = (int) $_POST['event_id'];
+$action = $_POST['action'];
 
-$exists = $conn->prepare("SELECT 1 FROM event_bookmarks WHERE user_id = ? AND event_id = ?");
-$exists->bind_param("ii", $user_id, $event_id);
-$exists->execute();
-$exists->store_result();
+header('Content-Type: application/json');
 
-if ($exists->num_rows > 0) {
-    $del = $conn->prepare("DELETE FROM event_bookmarks WHERE user_id = ? AND event_id = ?");
-    $del->bind_param("ii", $user_id, $event_id);
-    $del->execute();
-    echo json_encode(['bookmarked' => false]);
+if ($action === 'add') {
+    $stmt = $conn->prepare("INSERT IGNORE INTO bookmarks (user_id, event_id) VALUES (?, ?)");
+    $stmt->bind_param("ii", $user_id, $event_id);
+    $stmt->execute();
+    $stmt->close();
+    echo json_encode(['status' => 'success', 'message' => 'Event bookmarked']);
+} elseif ($action === 'remove') {
+    $stmt = $conn->prepare("DELETE FROM bookmarks WHERE user_id = ? AND event_id = ?");
+    $stmt->bind_param("ii", $user_id, $event_id);
+    $stmt->execute();
+    $stmt->close();
+    echo json_encode(['status' => 'success', 'message' => 'Bookmark removed']);
 } else {
-    $ins = $conn->prepare("INSERT INTO event_bookmarks (user_id, event_id) VALUES (?, ?)");
-    $ins->bind_param("ii", $user_id, $event_id);
-    $ins->execute();
-    echo json_encode(['bookmarked' => true]);
+    echo json_encode(['status' => 'error', 'message' => 'Invalid action']);
 }
+exit;

@@ -64,6 +64,17 @@ include 'includes/header.php';
     <div class="row g-4">
         <?php
         $result = $conn->query("SELECT * FROM events ORDER BY event_date ASC");
+        function is_event_bookmarked($conn, $user_id, $event_id)
+        {
+            $stmt = $conn->prepare("SELECT 1 FROM bookmarks WHERE user_id = ? AND event_id = ? LIMIT 1");
+            $stmt->bind_param("ii", $user_id, $event_id);
+            $stmt->execute();
+            $stmt->store_result();
+            $exists = $stmt->num_rows > 0;
+            $stmt->close();
+            return $exists;
+        }
+
         while ($row = $result->fetch_assoc()):
             $event_id = (int) $row['id'];
             $img_path = $row['image_path'];
@@ -85,7 +96,11 @@ include 'includes/header.php';
                             data-type="event" data-title="<?= htmlspecialchars($row['title']) ?>"
                             data-date="<?= htmlspecialchars($row['event_date']) ?>"
                             data-desc="<?= htmlspecialchars($row['description']) ?>"
-                            data-image="<?= htmlspecialchars($img_src) ?>"></a>
+                            data-image="<?= htmlspecialchars($img_src) ?>" data-event-id="<?= $event_id ?>"
+                            data-is-admin="<?= isset($_SESSION['role']) && $_SESSION['role'] === 'admin' ? '1' : '0' ?>"
+                            data-bookmarked="<?= isset($_SESSION['user_id']) && is_event_bookmarked($conn, $_SESSION['user_id'], $event_id) ? 'true' : 'false' ?>">
+                        </a>
+
                     </div>
 
 
@@ -109,6 +124,20 @@ include 'includes/header.php';
                                 <input type="hidden" name="event_id" value="<?= $event_id ?>">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                             </form>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION["user_id"])): ?>
+                        <div class="px-3 pb-2 d-flex justify-content-end">
+                            <?php if (isset($_SESSION["user_id"])): ?>
+                                <div class="px-3 pb-2 d-flex gap-2">
+                                    <button class="btn btn-sm btn-warning bookmark-btn" data-event-id="<?= $event_id ?>"
+                                        data-action="add">
+                                        Bookmark
+                                    </button>
+
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
@@ -138,6 +167,7 @@ include 'includes/header.php';
                                     <div><?= nl2br(htmlspecialchars($comment)) ?></div>
                                 </div>
                             <?php endwhile; ?>
+
                             <?php if (!$has_any): ?>
                                 <div class="text-muted small">No comments yet.</div>
                             <?php endif; ?>
@@ -163,6 +193,8 @@ include 'includes/header.php';
                 <p class="mb-1"><strong id="detailsModalDateLabel">Date:</strong> <span id="detailsModalDate"></span>
                 </p>
                 <p id="detailsModalDesc" style="white-space:pre-line;"></p>
+                <div id="detailsModalAlert" class="alert d-none" role="alert"></div>
+                <div id="detailsModalActions" class="mt-3 d-flex gap-2 flex-wrap"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -176,18 +208,148 @@ include 'includes/header.php';
         const trigger = e.target.closest('[data-bs-target="#detailsModal"]');
         if (!trigger) return;
 
-        document.getElementById('detailsModalTitle').textContent = trigger.getAttribute('data-title') || '';
-        document.getElementById('detailsModalDate').textContent = trigger.getAttribute('data-date') || '';
-        document.getElementById('detailsModalDesc').textContent = trigger.getAttribute('data-desc') || '';
-
+        const title = trigger.getAttribute('data-title') || '';
+        const date = trigger.getAttribute('data-date') || '';
+        const desc = trigger.getAttribute('data-desc') || '';
         const image = trigger.getAttribute('data-image') || '';
+        const eventId = trigger.getAttribute('data-event-id');
+        const isAdmin = trigger.getAttribute('data-is-admin') === '1';
+        const isBookmarked = trigger.getAttribute('data-bookmarked') === 'true';
+
+        document.getElementById('detailsModalTitle').textContent = title;
+        document.getElementById('detailsModalDate').textContent = date;
+        document.getElementById('detailsModalDesc').textContent = desc;
+
         const modalImg = document.getElementById('detailsModalImage');
         modalImg.src = image;
-        modalImg.alt = trigger.getAttribute('data-title');
+        modalImg.alt = title;
         modalImg.onerror = function () {
             this.onerror = null;
             this.src = 'images/default_event.jpg';
         };
+
+        const actionsContainer = document.getElementById('detailsModalActions');
+        actionsContainer.innerHTML = '';
+
+        if (eventId) {
+            const bookmarkBtn = document.createElement('button');
+            bookmarkBtn.className = 'btn btn-sm btn-warning';
+            bookmarkBtn.textContent = isBookmarked ? 'Unbookmark' : 'Bookmark';
+            bookmarkBtn.setAttribute('data-event-id', eventId);
+            bookmarkBtn.setAttribute('data-action', isBookmarked ? 'remove' : 'add');
+            bookmarkBtn.addEventListener('click', function () {
+                const alertBox = document.getElementById('detailsModalAlert');
+
+                const action = this.getAttribute('data-action');
+
+                fetch('bookmark.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `event_id=${eventId}&action=${action}`
+                })
+
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const newAction = action === 'add' ? 'remove' : 'add';
+                            this.textContent = newAction === 'add' ? 'Bookmark' : 'Unbookmark';
+                            this.setAttribute('data-action', newAction);
+
+                            alertBox.className = 'alert alert-success';
+                            alertBox.textContent = data.message;
+                            alertBox.classList.remove('d-none');
+                        } else {
+                            alertBox.className = 'alert alert-danger';
+                            alertBox.textContent = data.message || 'An error occurred.';
+                            alertBox.classList.remove('d-none');
+                        }
+                    });
+
+            });
+            actionsContainer.appendChild(bookmarkBtn);
+        }
+
+        if (isAdmin) {
+            const editLink = document.createElement('a');
+            editLink.className = 'btn btn-sm btn-outline-secondary';
+            editLink.href = `edit_event.php?id=${eventId}`;
+            editLink.textContent = 'Edit';
+            actionsContainer.appendChild(editLink);
+
+            const deleteForm = document.createElement('form');
+            deleteForm.method = 'POST';
+            deleteForm.action = 'delete_event.php';
+            deleteForm.onsubmit = () => confirm('Delete this event?');
+            deleteForm.innerHTML = `
+                <input type="hidden" name="event_id" value="${eventId}">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            `;
+            actionsContainer.appendChild(deleteForm);
+        }
+    });
+</script>
+
+<script>
+    document.querySelectorAll('.bookmark-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const eventId = this.getAttribute('data-event-id');
+            const action = this.getAttribute('data-action');
+            const button = this;
+
+            fetch('bookmark.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `event_id=${eventId}&action=${action}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const newAction = action === 'add' ? 'remove' : 'add';
+                        button.setAttribute('data-action', newAction);
+                        button.textContent = newAction === 'add' ? 'Bookmark' : 'Unbookmark';
+                    } else {
+                        alert(data.message || 'Bookmark action failed');
+                    }
+                });
+        });
+    });
+</script>
+
+<script>
+    document.querySelectorAll('.comment-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const eventId = form.getAttribute('data-event-id');
+            const container = form.closest('.card').querySelector('.comment-list');
+
+            fetch('comment.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) return alert(data.error);
+
+                    const newComment = document.createElement('div');
+                    newComment.className = 'border rounded p-2 mb-2 bg-white';
+                    newComment.innerHTML = `
+                <div class="mb-1">
+                    <strong>${data.username}</strong>
+                    <small class="text-muted">${data.posted_at}</small>
+                </div>
+                <div>${data.comment}</div>
+            `;
+
+                    container.prepend(newComment);
+                    form.reset();
+                });
+        });
     });
 </script>
 
