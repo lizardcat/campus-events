@@ -36,7 +36,7 @@ include 'includes/header.php';
     </button>
 </div>
 
-<?php if (isset($_SESSION["user_id"])): ?>
+<?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
     <div class="container my-5 p-4 border rounded bg-light shadow">
         <h2 class="text-primary mb-4">Submit Event</h2>
         <!-- AJAX form: NO action, uses fetch -->
@@ -100,6 +100,16 @@ include 'includes/header.php';
                                         required></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION["role"]) && $_SESSION['role'] === 'admin'): ?>
+                        <div class="d-flex justify-content-between px-3 pb-2">
+                            <a href="edit_event.php?id=<?= $event_id ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <form method="POST" action="delete_event.php" onsubmit="return confirm('Delete this event?');">
+                                <input type="hidden" name="event_id" value="<?= $event_id ?>">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                             </form>
                         </div>
                     <?php endif; ?>
