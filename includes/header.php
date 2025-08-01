@@ -6,7 +6,7 @@ include 'includes/head.php';
     <header class="bg-dark text-white py-3">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-3">
-                <img src="images/usiu_logo.png" alt="USIU Logo" height="50">
+                <img src="images/usiu_logo.png" alt="USIU Logo" height="50" width="100">
                 <h1 class="h4 m-0">USIU Campus Events</h1>
             </div>
             <nav>
