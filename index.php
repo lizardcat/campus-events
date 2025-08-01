@@ -39,7 +39,6 @@ include 'includes/header.php';
 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
     <div class="container my-5 p-4 border rounded bg-light shadow">
         <h2 class="text-primary mb-4">Submit Event</h2>
-        <!-- AJAX form: NO action, uses fetch -->
         <form id="eventForm" enctype="multipart/form-data">
             <div class="mb-3">
                 <input type="text" class="form-control" name="title" placeholder="Event Title" required>
@@ -74,7 +73,6 @@ include 'includes/header.php';
             ?>
             <div class="col-md-6 col-lg-4">
                 <div class="card shadow h-100">
-
                     <div class="position-relative clickable-area">
                         <img src="<?= htmlspecialchars($img_src) ?>" class="card-img-top" alt="Event Image"
                             style="height:180px;object-fit:cover;">
@@ -83,13 +81,13 @@ include 'includes/header.php';
                             <p class="card-text mb-2"><strong>Date:</strong> <?= htmlspecialchars($row['event_date']) ?></p>
                             <p class="card-text text-truncate m-0"><?= htmlspecialchars($row['description']) ?></p>
                         </div>
-
                         <a href="#" class="stretched-link" data-bs-toggle="modal" data-bs-target="#detailsModal"
                             data-type="event" data-title="<?= htmlspecialchars($row['title']) ?>"
                             data-date="<?= htmlspecialchars($row['event_date']) ?>"
                             data-desc="<?= htmlspecialchars($row['description']) ?>"
                             data-image="<?= htmlspecialchars($img_src) ?>"></a>
                     </div>
+
 
                     <?php if (isset($_SESSION["user_id"])): ?>
                         <div class="px-3 pb-3 pt-2 comment-interactive position-relative">
@@ -114,24 +112,24 @@ include 'includes/header.php';
                         </div>
                     <?php endif; ?>
 
-                    <?php
-                    $cstmt = $conn->prepare("
-            SELECT c.comment, c.posted_at, u.username 
-            FROM comments c 
-            JOIN users u ON c.user_id = u.id 
-            WHERE c.event_id = ? 
-            ORDER BY c.posted_at DESC
-            ");
-                    $cstmt->bind_param("i", $event_id);
-                    $cstmt->execute();
-                    $cstmt->bind_result($comment, $posted_at, $username);
-                    $has_any = false;
-                    ?>
                     <div class="card-footer bg-light">
                         <h6 class="mb-2">Comments:</h6>
                         <div class="comment-list" data-event-id="<?= $event_id ?>">
-                            <?php while ($cstmt->fetch()):
-                                $has_any = true; ?>
+                            <?php
+                            $cstmt = $conn->prepare("
+                            SELECT c.comment, c.posted_at, u.username 
+                            FROM comments c 
+                            JOIN users u ON c.user_id = u.id 
+                            WHERE c.event_id = ? 
+                            ORDER BY c.posted_at DESC
+                        ");
+                            $cstmt->bind_param("i", $event_id);
+                            $cstmt->execute();
+                            $cstmt->bind_result($comment, $posted_at, $username);
+                            $has_any = false;
+                            while ($cstmt->fetch()):
+                                $has_any = true;
+                                ?>
                                 <div class="border rounded p-2 mb-2 bg-white">
                                     <div class="mb-1">
                                         <strong><?= htmlspecialchars($username) ?></strong>
@@ -143,10 +141,9 @@ include 'includes/header.php';
                             <?php if (!$has_any): ?>
                                 <div class="text-muted small">No comments yet.</div>
                             <?php endif; ?>
+                            <?php $cstmt->close(); ?>
                         </div>
                     </div>
-                    <?php $cstmt->close(); ?>
-
                 </div>
             </div>
         <?php endwhile; ?>
@@ -175,170 +172,22 @@ include 'includes/header.php';
 </div>
 
 <script>
-    // AJAX: Submit Event with optional image
-    const eventForm = document.getElementById('eventForm');
-    if (eventForm) {
-        eventForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const alertBox = document.getElementById('eventFormAlert');
-            alertBox.className = 'mt-3 d-none';
-            alertBox.textContent = '';
-
-            const formData = new FormData(eventForm);
-
-            try {
-                const res = await fetch('submit.php', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (!res.ok || data.error) {
-                    alertBox.className = 'alert alert-danger mt-3';
-                    alertBox.textContent = data.error || 'Failed to submit.';
-                    return;
-                }
-
-                const grid = document.querySelector('.row.g-4');
-                if (grid) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'col-md-6 col-lg-4';
-                    wrapper.innerHTML = renderEventCard(data);
-                    grid.prepend(wrapper);
-
-                    const newForm = wrapper.querySelector('.comment-form');
-                    if (newForm) {
-                        newForm.addEventListener('click', ev => ev.stopPropagation());
-                        newForm.querySelectorAll('textarea, input, button').forEach(el => {
-                            el.addEventListener('click', ev => ev.stopPropagation());
-                        });
-                        wireAjaxCommentForm(newForm);
-                    }
-                }
-
-                eventForm.reset();
-                alertBox.className = 'alert alert-success mt-3';
-                alertBox.textContent = 'Event created.';
-            } catch (err) {
-                alertBox.className = 'alert alert-danger mt-3';
-                alertBox.textContent = 'Network error.';
-            }
-        });
-    }
-
-    // Build new event card HTML to match existing structure
-    function renderEventCard(ev) {
-        const img = ev.image_path_resolved || 'images/default_event.jpg';
-        const id = ev.id;
-        const title = escapeHtml(ev.title);
-        const date = escapeHtml(ev.event_date);
-        const desc = escapeHtml(ev.description || '');
-
-        return `
-    <div class="card shadow h-100">
-        <div class="position-relative clickable-area">
-        <img src="${escapeAttr(img)}" class="card-img-top" alt="Event Image" style="height:180px;object-fit:cover;">
-        <div class="card-body pb-2">
-            <h5 class="card-title mb-1">${title}</h5>
-            <p class="card-text mb-2"><strong>Date:</strong> ${date}</p>
-            <p class="card-text text-truncate m-0">${desc}</p>
-        </div>
-        <a href="#"
-            class="stretched-link"
-            data-bs-toggle="modal"
-            data-bs-target="#detailsModal"
-            data-type="event"
-            data-title="${escapeAttr(ev.title)}"
-            data-date="${escapeAttr(ev.event_date)}"
-            data-desc="${escapeAttr(ev.description || '')}"
-            data-image="${escapeAttr(img)}"></a>
-        </div>
-
-        <div class="px-3 pb-3 pt-2 comment-interactive position-relative">
-        <form method="POST" action="comment.php" class="comment-form" data-event-id="${id}">
-            <input type="hidden" name="event_id" value="${id}">
-            <div class="mb-2">
-            <textarea name="comment" class="form-control" rows="2" placeholder="Write a comment..." required></textarea>
-            </div>
-            <button type="submit" class="btn btn-sm btn-outline-primary">Comment</button>
-        </form>
-        </div>
-
-        <div class="card-footer bg-light">
-        <h6 class="mb-2">Comments:</h6>
-        <div class="comment-list" data-event-id="${id}">
-            <div class="text-muted small">No comments yet.</div>
-        </div>
-        </div>
-    </div>`;
-    }
-
-    // Escape helpers
-    function escapeHtml(s) { return (s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
-    function escapeAttr(s) { return escapeHtml(s).replace(/"/g, '&quot;'); }
-
-    // AJAX comments (existing + newly added)
-    function wireAjaxCommentForm(form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const eventId = form.dataset.eventId;
-            const formData = new FormData(form);
-
-            try {
-                const res = await fetch('comment.php', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (data.error) { alert(data.error); return; }
-
-                const box = document.createElement('div');
-                box.className = 'border rounded p-2 mb-2 bg-white';
-                box.innerHTML = `
-        <div class="mb-1">
-            <strong>${data.username}</strong>
-            <small class="text-muted">${data.posted_at}</small>
-            </div>
-            <div>${data.comment}</div>
-        `;
-
-                const container = document.querySelector(`.comment-list[data-event-id='${eventId}']`);
-                if (!container) return;
-
-                const placeholder = container.querySelector('.text-muted.small');
-                if (placeholder) placeholder.remove();
-
-                container.prepend(box);
-                form.reset();
-            } catch (err) {
-                alert('Failed to post comment.');
-            }
-        });
-    }
-
-    document.querySelectorAll('.comment-form').forEach(form => {
-        form.addEventListener('click', e => e.stopPropagation());
-        form.querySelectorAll('textarea, input, button').forEach(el => {
-            el.addEventListener('click', e => e.stopPropagation());
-        });
-        wireAjaxCommentForm(form);
-    });
-
-    // Modal population
     document.addEventListener('click', (e) => {
         const trigger = e.target.closest('[data-bs-target="#detailsModal"]');
         if (!trigger) return;
 
-        const title = trigger.getAttribute('data-title') || '';
-        const date = trigger.getAttribute('data-date') || '';
-        const desc = trigger.getAttribute('data-desc') || '';
+        document.getElementById('detailsModalTitle').textContent = trigger.getAttribute('data-title') || '';
+        document.getElementById('detailsModalDate').textContent = trigger.getAttribute('data-date') || '';
+        document.getElementById('detailsModalDesc').textContent = trigger.getAttribute('data-desc') || '';
+
         const image = trigger.getAttribute('data-image') || '';
-
-        document.getElementById('detailsModalTitle').textContent = title;
-        document.getElementById('detailsModalDate').textContent = date;
-        document.getElementById('detailsModalDateLabel').style.display = date ? '' : 'none';
-        document.getElementById('detailsModalDesc').textContent = desc;
-
         const modalImg = document.getElementById('detailsModalImage');
-        modalImg.src = image || 'images/default_event.jpg';
-        modalImg.alt = title;
-        modalImg.onerror = function () { this.onerror = null; this.src = 'images/default_event.jpg'; };
+        modalImg.src = image;
+        modalImg.alt = trigger.getAttribute('data-title');
+        modalImg.onerror = function () {
+            this.onerror = null;
+            this.src = 'images/default_event.jpg';
+        };
     });
 </script>
 
