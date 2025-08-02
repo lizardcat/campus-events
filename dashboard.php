@@ -11,6 +11,24 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Fetch registered events
+$stmt = $conn->prepare("
+    SELECT e.id, e.title, e.event_date 
+    FROM event_registrations r
+    JOIN events e ON r.event_id = e.id 
+    WHERE r.user_id = ? 
+    ORDER BY e.event_date ASC
+");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($reg_event_id, $reg_title, $reg_event_date);
+$registrations = [];
+while ($stmt->fetch()) {
+    $registrations[] = ['event_id' => $reg_event_id, 'title' => $reg_title, 'event_date' => $reg_event_date];
+}
+$stmt->close();
+
+// Fetch bookmarks
 $stmt = $conn->prepare("
     SELECT e.id, e.title, e.event_date 
     FROM bookmarks b 
@@ -23,14 +41,11 @@ $stmt->execute();
 $stmt->bind_result($event_id, $title, $event_date);
 $bookmarks = [];
 while ($stmt->fetch()) {
-    $bookmarks[] = [
-        'event_id' => $event_id,
-        'title' => $title,
-        'event_date' => $event_date
-    ];
+    $bookmarks[] = ['event_id' => $event_id, 'title' => $title, 'event_date' => $event_date];
 }
 $stmt->close();
 
+// Fetch comments
 $stmt = $conn->prepare("
     SELECT c.id, e.title, e.event_date, c.comment, c.posted_at 
     FROM comments c 
@@ -55,7 +70,36 @@ $stmt->close();
 ?>
 
 <div class="container my-5">
-    <div class="card shadow border-0">
+
+    <!-- Registered Events -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Your Registered Events</h4>
+        </div>
+        <div class="card-body">
+            <?php if (count($registrations) === 0): ?>
+                <p class="text-muted">You haven't registered for any events yet.</p>
+            <?php else: ?>
+                <ul class="list-group list-group-flush">
+                    <?php foreach ($registrations as $r): ?>
+                        <li class="list-group-item" id="registration-<?= $r['event_id'] ?>">
+                            <div class="fw-bold">
+                                <?= htmlspecialchars($r['title']) ?>
+                                <span class="text-muted small">(<?= htmlspecialchars($r['event_date']) ?>)</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger cancel-registration-btn"
+                                data-event-id="<?= $r['event_id'] ?>">
+                                Cancel Registration
+                            </button>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Bookmarked Events -->
+    <div class="card shadow border-0 mb-4">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">Your Bookmarked Events</h4>
         </div>
@@ -80,9 +124,8 @@ $stmt->close();
             <?php endif; ?>
         </div>
     </div>
-</div>
 
-<div class="container my-5">
+    <!-- Comment History -->
     <div class="card shadow border-0">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">Your Comment History</h4>
@@ -112,11 +155,35 @@ $stmt->close();
             <?php endif; ?>
         </div>
     </div>
+
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
+        // Cancel registration
+        document.querySelectorAll('.cancel-registration-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const eventId = this.dataset.eventId;
+                fetch('cancel_registration.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ event_id: eventId })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const li = document.getElementById(`registration-${eventId}`);
+                            li.classList.add('text-danger');
+                            li.innerHTML = 'Registration canceled.';
+                        } else {
+                            alert(data.message || 'Failed to cancel registration.');
+                        }
+                    });
+            });
+        });
+
+        // Remove bookmark
         document.querySelectorAll('.remove-bookmark-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const eventId = this.dataset.eventId;
@@ -138,6 +205,7 @@ $stmt->close();
             });
         });
 
+        // Comment edit/delete
         document.querySelectorAll('.comment-item').forEach(item => {
             const editBtn = item.querySelector('.edit-comment-btn');
             const deleteForm = item.querySelector('.delete-comment-form');

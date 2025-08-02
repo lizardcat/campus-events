@@ -19,9 +19,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $role = 'user';
         $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssss", $username, $email, $hashed, $role);
-        $stmt->execute();
-        header("Location: login.php?registered=1");
-        exit;
+
+        if ($stmt->execute()) {
+            // Send welcome email (local dev with Papercut SMTP)
+            $to = $email; // Can be a fake email for local dev
+            $subject = "Welcome to USIU Campus Events";
+            $message = "Hello $username,\n\n" .
+                "Thank you for registering at USIU Campus Events.\n" .
+                "You can now log in and start exploring events.\n\n" .
+                "Regards,\nUSIU Campus Events Team";
+            $headers = "From: no-reply@localhost\r\n";
+            $headers .= "X-Mailer: PHP/" . phpversion();
+
+            // Send email
+            mail($to, $subject, $message, $headers);
+
+            header("Location: login.php?registered=1");
+            exit;
+        } else {
+            $error = "Error registering user: " . $stmt->error;
+        }
     }
 }
 ?>
