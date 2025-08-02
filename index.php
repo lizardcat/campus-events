@@ -81,7 +81,7 @@ include 'includes/header.php';
         while ($row = $result->fetch_assoc()):
             $event_id = (int) $row['id'];
             $img_path = $row['image_path'];
-            $img_src = (is_string($img_path) && $img_path !== '') ? $img_path : 'images/default_event.jpg';
+            $img_src = (!empty($img_path) && file_exists(__DIR__ . '/' . $img_path)) ? $img_path : 'images/default_event.jpg';
             $bookmarked = isset($_SESSION['user_id']) && is_event_bookmarked($conn, $_SESSION['user_id'], $event_id);
             ?>
             <div class="col-md-6 col-lg-4">
