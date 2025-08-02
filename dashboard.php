@@ -12,16 +12,15 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 $stmt = $conn->prepare("
-        SELECT e.id, e.title, e.event_date 
-        FROM bookmarks b 
-        JOIN events e ON b.event_id = e.id 
-        WHERE b.user_id = ? 
-        ORDER BY e.event_date ASC
-    ");
+    SELECT e.id, e.title, e.event_date 
+    FROM bookmarks b 
+    JOIN events e ON b.event_id = e.id 
+    WHERE b.user_id = ? 
+    ORDER BY e.event_date ASC
+");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $stmt->bind_result($event_id, $title, $event_date);
-
 $bookmarks = [];
 while ($stmt->fetch()) {
     $bookmarks[] = [
@@ -42,7 +41,6 @@ $stmt = $conn->prepare("
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $stmt->bind_result($comment_id, $title, $event_date, $comment, $posted_at);
-
 $comments = [];
 while ($stmt->fetch()) {
     $comments[] = [
@@ -54,7 +52,6 @@ while ($stmt->fetch()) {
     ];
 }
 $stmt->close();
-
 ?>
 
 <div class="container my-5">
@@ -96,16 +93,15 @@ $stmt->close();
             <?php else: ?>
                 <ul class="list-group list-group-flush">
                     <?php foreach ($comments as $c): ?>
-                        <li class="list-group-item">
+                        <li class="list-group-item comment-item" data-comment-id="<?= $c['comment_id'] ?>">
                             <div class="fw-bold"><?= htmlspecialchars($c['title']) ?>
                                 <span class="text-muted small">(<?= htmlspecialchars($c['event_date']) ?>)</span>
                             </div>
-                            <div class="mt-1"><?= nl2br(htmlspecialchars($c['comment'])) ?></div>
+                            <div class="mt-1 comment-text"><?= nl2br(htmlspecialchars($c['comment'])) ?></div>
                             <div class="text-muted small mt-1"><?= htmlspecialchars($c['posted_at']) ?></div>
                             <div class="mt-2">
-                                <a href="edit_comment.php?id=<?= $c['comment_id'] ?>"
-                                    class="btn btn-sm btn-outline-secondary">Edit</a>
-                                <form method="POST" action="delete_comment.php" class="d-inline">
+                                <a href="#" class="btn btn-sm btn-outline-secondary edit-comment-btn">Edit</a>
+                                <form method="POST" action="delete_comment.php" class="d-inline delete-comment-form">
                                     <input type="hidden" name="comment_id" value="<?= $c['comment_id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
@@ -113,7 +109,6 @@ $stmt->close();
                         </li>
                     <?php endforeach; ?>
                 </ul>
-
             <?php endif; ?>
         </div>
     </div>
@@ -121,60 +116,52 @@ $stmt->close();
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+
         document.querySelectorAll('.remove-bookmark-btn').forEach(button => {
             button.addEventListener('click', function () {
-                const eventId = this.getAttribute('data-event-id');
-
+                const eventId = this.dataset.eventId;
                 fetch('bookmark.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        event_id: eventId,
-                        action: 'remove'
-                    })
+                    body: new URLSearchParams({ event_id: eventId, action: 'remove' })
                 })
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(data => {
                         if (data.status === 'success') {
                             const li = document.getElementById(`bookmark-${eventId}`);
-                            li.innerHTML = '<span class="text-success">Bookmark removed.</span>';
+                            li.classList.add('text-success');
+                            li.innerHTML = 'Bookmark removed.';
                         } else {
                             alert('Failed to remove bookmark.');
                         }
-                    })
-                    .catch(() => alert('Error contacting server.'));
+                    });
             });
         });
 
-        document.querySelectorAll('.list-group-item').forEach(item => {
-            const deleteForm = item.querySelector('form');
-            const commentId = deleteForm.querySelector('input[name="comment_id"]').value;
-            const commentDiv = item.querySelector('div.mt-1');
-            const originalEditBtn = item.querySelector('.btn-outline-secondary');
+        document.querySelectorAll('.comment-item').forEach(item => {
+            const editBtn = item.querySelector('.edit-comment-btn');
+            const deleteForm = item.querySelector('.delete-comment-form');
+            const commentId = item.dataset.commentId;
+            const commentDiv = item.querySelector('.comment-text');
 
-            if (originalEditBtn && commentDiv) {
-                bindEdit(originalEditBtn, item, commentDiv, commentId);
-            }
+            bindEdit(editBtn, item, commentDiv, commentId);
 
-            if (deleteForm) {
-                deleteForm.addEventListener('submit', e => {
-                    e.preventDefault();
-                    const formData = new FormData(deleteForm);
-                    fetch('delete_comment.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                item.innerHTML = '<span class="text-danger">Comment deleted.</span>';
-                            } else {
-                                alert(data.error || 'Delete failed');
-                            }
-                        })
-                        .catch(() => alert('Server error during comment delete.'));
-                });
-            }
+            deleteForm.addEventListener('submit', e => {
+                e.preventDefault();
+                fetch('delete_comment.php', {
+                    method: 'POST',
+                    body: new FormData(deleteForm)
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            item.classList.add('text-danger');
+                            item.innerHTML = 'Comment deleted.';
+                        } else {
+                            alert(data.error || 'Delete failed');
+                        }
+                    });
+            });
         });
 
         function bindEdit(editBtn, item, commentDiv, commentId) {
@@ -184,7 +171,7 @@ $stmt->close();
 
                 const textarea = document.createElement('textarea');
                 textarea.className = 'form-control';
-                textarea.value = commentDiv.textContent.trim();
+                textarea.value = commentDiv.innerHTML.replace(/<br\s*\/?>/gi, '\n');
 
                 const saveBtn = document.createElement('button');
                 saveBtn.className = 'btn btn-sm btn-success mt-2';
@@ -194,17 +181,15 @@ $stmt->close();
                 cancelBtn.className = 'btn btn-sm btn-secondary mt-2 ms-2';
                 cancelBtn.textContent = 'Cancel';
 
-                const clonedEditBtn = editBtn.cloneNode(true);
-
                 commentDiv.replaceWith(textarea);
                 editBtn.replaceWith(saveBtn);
                 item.appendChild(cancelBtn);
 
                 cancelBtn.addEventListener('click', () => {
                     textarea.replaceWith(commentDiv);
-                    saveBtn.replaceWith(clonedEditBtn);
+                    saveBtn.replaceWith(editBtn);
                     cancelBtn.remove();
-                    bindEdit(clonedEditBtn, item, commentDiv, commentId);
+                    bindEdit(editBtn, item, commentDiv, commentId);
                 });
 
                 saveBtn.addEventListener('click', () => {
@@ -220,27 +205,21 @@ $stmt->close();
                         .then(data => {
                             if (data.status === 'success' && data.updated_comment) {
                                 const newCommentDiv = document.createElement('div');
-                                newCommentDiv.className = 'mt-1';
+                                newCommentDiv.className = 'mt-1 comment-text';
                                 newCommentDiv.innerHTML = data.updated_comment;
 
                                 textarea.replaceWith(newCommentDiv);
-                                saveBtn.replaceWith(clonedEditBtn);
+                                saveBtn.replaceWith(editBtn);
                                 cancelBtn.remove();
-
-                                bindEdit(clonedEditBtn, item, newCommentDiv, commentId);
+                                bindEdit(editBtn, item, newCommentDiv, commentId);
                             } else {
                                 alert(data.error || 'Edit failed');
                             }
-                        })
-                        .catch(() => alert('Server error during comment update.'));
+                        });
                 });
             });
         }
     });
-
 </script>
-
-
-
 
 <?php include 'includes/footer.php'; ?>
