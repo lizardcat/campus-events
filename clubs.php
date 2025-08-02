@@ -8,6 +8,38 @@ $q = "SELECT * FROM clubs ORDER BY name ASC";
 $result = mysqli_query($conn, $q);
 ?>
 
+<div id="clubsCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="images/school4.jpg" class="d-block w-100 carousel-img" alt="Club Gathering">
+            <div class="carousel-caption caption-elevated d-none d-md-block">
+                <h2>Join a Community That Shares Your Passion</h2>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="images/school5.jpg" class="d-block w-100 carousel-img" alt="Workshop">
+            <div class="carousel-caption caption-elevated d-none d-md-block">
+                <h2>Develop Skills Through Club Activities</h2>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="images/school6.jpg" class="d-block w-100 carousel-img" alt="Club Event">
+            <div class="carousel-caption caption-elevated d-none d-md-block">
+                <h2>Lead and Inspire in Student Organizations</h2>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#clubsCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#clubsCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+
 <div class="container mt-5">
     <h1 class="mb-4 text-primary">University Clubs</h1>
 
