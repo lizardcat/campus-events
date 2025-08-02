@@ -145,7 +145,12 @@ include 'includes/header.php';
                                 data-action="<?= $bookmarked ? 'remove' : 'add' ?>">
                                 <?= $bookmarked ? 'Unbookmark' : 'Bookmark' ?>
                             </button>
+
+                            <button class="btn btn-sm btn-success event-register-btn" data-event-id="<?= $event_id ?>">
+                                Register
+                            </button>
                         </div>
+
                         <div class="px-3 pb-3 pt-2 comment-interactive position-relative">
                             <form method="POST" action="comment.php" class="comment-form" data-event-id="<?= $event_id ?>">
                                 <input type="hidden" name="event_id" value="<?= $event_id ?>">
@@ -357,6 +362,28 @@ include 'includes/header.php';
                 });
         });
     });
+
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('event-register-btn')) {
+            const btn = e.target;
+            const eventId = btn.getAttribute('data-event-id');
+
+            fetch('event_register.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `event_id=${eventId}`
+            })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.status === 'success') {
+                        btn.textContent = 'Registered';
+                        btn.disabled = true;
+                    }
+                });
+        }
+    });
+
 </script>
 
 <?php include 'includes/footer.php'; ?>
