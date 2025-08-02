@@ -6,36 +6,34 @@ include 'includes/header.php';
 ?>
 
 <div id="schoolCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
-    <div id="schoolCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="images/school1.jpg" class="d-block w-100 carousel-img" alt="Campus">
-                <div class="carousel-caption caption-elevated d-none d-md-block">
-                    <h2>Discover Upcoming Events at USIU</h2>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/school2.jpg" class="d-block w-100 carousel-img" alt="Library">
-                <div class="carousel-caption caption-elevated d-none d-md-block">
-                    <h2>Clubs and Activities for Every Interest</h2>
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="images/school3.jpg" class="d-block w-100 carousel-img" alt="Event">
-                <div class="carousel-caption caption-elevated d-none d-md-block">
-                    <h2>Learn, Connect, and Grow Together</h2>
-                </div>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="images/school1.jpg" class="d-block w-100 carousel-img" alt="Campus">
+            <div class="carousel-caption caption-elevated d-none d-md-block">
+                <h2>Discover Upcoming Events at USIU</h2>
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#schoolCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#schoolCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
+        <div class="carousel-item">
+            <img src="images/school2.jpg" class="d-block w-100 carousel-img" alt="Library">
+            <div class="carousel-caption caption-elevated d-none d-md-block">
+                <h2>Clubs and Activities for Every Interest</h2>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="images/school3.jpg" class="d-block w-100 carousel-img" alt="Event">
+            <div class="carousel-caption caption-elevated d-none d-md-block">
+                <h2>Learn, Connect, and Grow Together</h2>
+            </div>
+        </div>
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#schoolCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#schoolCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
 </div>
 
 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
@@ -59,7 +57,44 @@ include 'includes/header.php';
         </form>
         <div id="eventFormAlert" class="mt-3 d-none"></div>
     </div>
+
+    <script>
+        document.getElementById('eventForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const alertBox = document.getElementById('eventFormAlert');
+
+            fetch('submit.php', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        alertBox.textContent = data.error;
+                        alertBox.className = 'alert alert-danger mt-3';
+                    } else if (data.status === 'success') {
+                        this.reset();
+                        alertBox.textContent = 'Event created successfully.';
+                        alertBox.className = 'alert alert-success mt-3';
+                        const eventsContainer = document.querySelector('.row.g-4');
+                        if (eventsContainer) {
+                            eventsContainer.insertAdjacentHTML('afterbegin', data.card_html);
+                        }
+                    }
+                    alertBox.classList.remove('d-none');
+                })
+                .catch(() => {
+                    alertBox.textContent = 'An unexpected error occurred.';
+                    alertBox.className = 'alert alert-danger mt-3';
+                    alertBox.classList.remove('d-none');
+                });
+        });
+    </script>
+
 <?php endif; ?>
+
 
 <div class="container my-5">
     <h2 class="text-primary mb-4">Upcoming Events</h2>
