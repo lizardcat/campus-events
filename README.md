@@ -78,53 +78,81 @@ A PHP-MySQL web application for managing university events, user registrations, 
 
 ## Setup Instructions
 
-1. **Clone the Repository**
+**1. Clone the Repository**
 
-   ```bash
-   git clone https://github.com/lizardcat/campus-events.git
-   cd campus-events
-   ```
+```bash
+ git clone https://github.com/lizardcat/campus-events.git
+ cd campus-events
+```
 
-2. **Database Setup**
+**2. Database Setup**
 
-   - Create a new MySQL database:
+- Create a new MySQL database:
 
-     ```sql
-     CREATE DATABASE usiu_events;
-     ```
+  ```sql
+  CREATE DATABASE usiu_events;
+  ```
 
-   - Import the provided schema (update with your SQL file path):
+- Import the provided schema (update with your SQL file path):
 
-     ```bash
-     mysql -u root -p usiu_events < database/schema.sql
-     ```
+  ```bash
+  mysql -u root -p usiu_events < database/schema.sql
+  ```
 
-3. **Configure Database Connection**
+**3. Configure Database Connection**
 
-   - Open `includes/db.php` in your editor
-   - Locate the `$password` variable:
+- Open `includes/db.php` in your editor
+- Locate the `$password` variable:
 
-     ```php
-     $password = 'your_mysql_password';
-     ```
+  ```php
+  $password = 'your_mysql_password';
+  ```
 
-   - Replace `'your_mysql_password'` with your actual MySQL password or leave empty `''` if you don't have a password set
-   - Save the file
+- Replace `'your_mysql_password'` with your actual MySQL password or leave empty `''` if you don't have a password set
+- Save the file
 
-4. **Run the Application**
+**4. Run the Application**
 
-   - Place the project folder in your web server's document root (e.g., `htdocs` for XAMPP)
-   - Start Apache and MySQL
-   - Visit:
+- Place the project folder in your web server's document root (e.g., `htdocs` for XAMPP)
+- Start Apache and MySQL
+- Visit:
 
-     ```
-     http://localhost/campus-events
-     ```
+  ```
+  http://localhost/campus-events
+  ```
 
-5. **Default Admin User**
+**5. Default Admin User**
 
-   - Create an admin account directly in the database or via the registration form and manually set the role in the `users` table:
+Create an admin account directly in the database or via the registration form and manually set the role in the `users` table:
 
      ```sql
      UPDATE users SET role = 'admin' WHERE username = 'your_admin_username';
      ```
+
+**6. Local Email Testing with Papercut SMTP**
+
+This project can send registration and event confirmation emails locally without delivering them to a real inbox using Papercut SMTP.
+
+- Install [Papercut SMTP](https://github.com/ChangemakerStudios/Papercut-SMTP?tab=readme-ov-file))
+
+  - Download and run the Papercut SMTP application for your OS.
+
+  - It will listen on `localhost:25` by default and capture all outgoing emails.
+
+- Configure PHP to use Papercut
+
+  - Locate and open your `php.ini` file (for XAMPP/WAMP/MAMP, it’s usually in the php folder). Find and set the following values:
+
+  ```bash
+    SMTP = localhost
+    smtp_port = 25
+    sendmail_from = no-reply@localhost
+  ```
+
+- Save `php.ini` and restart Apache.
+
+- View Captured Emails
+  - With Papercut SMTP running, trigger an email (e.g., register a new account).
+  - Open the Papercut application window — the email will appear instantly for preview.
+
+This setup works for all local emails in the app (registration welcome messages, event registration confirmations, login alerts, etc.) without sending anything over the internet.
