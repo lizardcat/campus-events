@@ -3,10 +3,9 @@ session_start();
 header('Content-Type: application/json');
 require_once 'includes/db.php';
 
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    http_response_code(403);
+    exit('Forbidden');
 }
 
 $title = trim($_POST['title'] ?? '');

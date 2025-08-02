@@ -16,8 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Passwords do not match.";
     } else {
         $hashed = password_hash($pass, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $username, $email, $hashed);
+        $role = 'user';
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $username, $email, $hashed, $role);
         $stmt->execute();
         header("Location: login.php?registered=1");
         exit;

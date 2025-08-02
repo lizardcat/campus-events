@@ -13,6 +13,12 @@ include 'includes/head.php';
                 <ul class="nav">
                     <li class="nav-item"><a href="index.php" class="nav-link text-white">Home</a></li>
                     <li class="nav-item"><a href="clubs.php" class="nav-link text-white">Clubs</a></li>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <li class="nav-item">
+                            <a href="dashboard.php" class="nav-link text-white">Dashboard</a>
+                        </li>
+                    <?php endif; ?>
+
                     <?php if (isset($_SESSION['username'])): ?>
                         <li class="nav-item"><a href="logout.php" class="nav-link text-warning">Logout
                                 (<?= htmlspecialchars($_SESSION['username']) ?>)</a></li>

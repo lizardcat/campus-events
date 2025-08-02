@@ -11,13 +11,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifier = $_POST['username']; // can be username or email
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
+    $stmt = $conn->prepare("SELECT id, username, password, role FROM users WHERE username = ? OR email = ?");
     $stmt->bind_param("ss", $identifier, $identifier);
     $stmt->execute();
-    $stmt->bind_result($id, $username, $hashed);
+    $stmt->bind_result($id, $username, $hashed, $role);
+
     if ($stmt->fetch() && password_verify($password, $hashed)) {
         $_SESSION['user_id'] = $id;
         $_SESSION['username'] = $username;
+        $_SESSION['role'] = $role;
         header("Location: index.php");
         exit;
     } else {
