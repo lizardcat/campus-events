@@ -41,7 +41,7 @@ $result = mysqli_query($conn, $q);
 
 
 <div class="container mt-5">
-    <h1 class="mb-4 text-primary">University Clubs</h1>
+    <h2 class="text-primary mb-4">University Clubs</h2>
 
     <div class="row g-4">
         <?php if ($result && mysqli_num_rows($result) > 0): ?>
