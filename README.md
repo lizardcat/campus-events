@@ -36,10 +36,10 @@ A PHP-MySQL web application for managing university events, user registrations, 
   - Admins can create, edit, and delete events
   - Event images with fallback support
 
-- **Bookmark System**
+- **Bookmark & Event Registration System**
 
-  - Users can bookmark or unbookmark events from both the main list and modal view
-  - Bookmarks are synchronized across dashboard and event listings
+  - Users can bookmark or unbookmark events and register or unregister events from both the main list and modal view
+  - Bookmarks and event registrations are synchronized across dashboard and event listings
 
 - **Commenting System**
 
@@ -60,6 +60,11 @@ A PHP-MySQL web application for managing university events, user registrations, 
 
   - User actions restricted based on login state and role
   - Unauthorized actions return JSON error responses for AJAX requests
+
+- **Email Validation**
+
+  - New user registrations send an email to the provided address.
+  - Registering to attend an event sends a confirmation email to the user.
 
 ## RBAC Implementation
 
