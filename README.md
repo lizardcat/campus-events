@@ -2,6 +2,10 @@
 
 A PHP-MySQL web application for managing university events, user registrations, bookmarks, and comment submissions. Designed for educational demonstration with clear separation of concerns and essential security practices.
 
+<a href="https://usiu-campus-events.dreamhosters.com/" target="_blank">
+  <img src="https://img.shields.io/badge/LIVE_DEMO-Click_Here-blue?style=for-the-badge&logo=github" />
+</a>
+
 ## Screenshots
 
 ### Front Page
